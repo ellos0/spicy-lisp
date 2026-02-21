@@ -4,7 +4,6 @@ where
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
 import System.IO
-import System.Environment
 
 data LispVal = Atom String
              | List [LispVal]
@@ -48,17 +47,22 @@ parseNumber :: Parser LispVal
 parseNumber = liftM (Number . read) $ many1 digit
 
 parseList :: Parser LispVal
-parseList = liftM List $ sepBy parseExpr spaces
+parseList = liftM List $ sepBy parseExpr whitespaces
+
+parseFullList :: Parser LispVal
+parseFullList = do
+  _ <- char '('
+  _ <- maybeWhitespace
+  x <- try parseList
+  _ <- maybeWhitespace
+  _ <- char ')'
+  return x
 
 parseExpr :: Parser LispVal
 parseExpr =  parseAtom
          <|> parseString
          <|> parseNumber
-         <|> do
-                _ <- char '('
-                x <- try parseList
-                _ <- char ')'
-                return x
+         <|> parseFullList
 
 instance Show LispVal where show = showVal
 
@@ -76,6 +80,12 @@ compileFile f = do
     Right val -> (print (showC val))
     Left err -> (print ("Error: " ++ show err))
 
+compileCode :: String -> IO ()
+compileCode code = do
+  case parse parseExpr "lisp" code of
+    Right val -> (print (showC val))
+    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
+    
 unwordsList :: [LispVal] -> String
 unwordsList = unwords . map showVal
 
@@ -101,11 +111,15 @@ showC (List (op:args)) = case (op) of
   (Atom "/") -> concat [showC (args !! 0), "/", showC (args !! 1)]
   (Atom "print") -> concat ["printf(", showC (args !! 0), ");\n"]
   (Atom "defun") -> concat [showC (args !! 1), " ", showC (args !! 0), "(){\n", showC (args !! 2), "}"]
-  (Atom "type") -> showC (args !! 0)
+  (Atom "type") -> (case (args !! 0) of
+                      (Atom "i4") -> "int"
+                      (Atom "i2") -> "short"
+                      _ -> "int"
+                      )
   (List _) -> concat (map showC (op:args))
   _ -> ""
 
 main :: IO ()
 main = do
-  args <- getArgs
-  compileFile (args !! 0)
+  code <- getContents
+  compileCode code
