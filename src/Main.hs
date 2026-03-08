@@ -1,9 +1,9 @@
-module Main
-where
+module Main where
 
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
 import System.IO
+import System.Environment (getArgs)
 
 import Codegen
 import Struct
@@ -53,8 +53,8 @@ parseAtom = do
               rest <- many (letter <|> digit <|> symbol)
               let atom = first:rest
               return $ case atom of 
-                         ":t" -> Bool True
-                         ":f" -> Bool False
+                         "true" -> Bool True
+                         "false" -> Bool False
                          _ -> Atom atom
 
 parseNumber :: Parser LispVal
@@ -78,6 +78,13 @@ parseExpr =  parseAtom
          <|> parseNumber
          <|> parseFullList
 
+
+parseCode :: String -> IO ()
+parseCode code = do
+  case parse parseExpr "lisp" code of
+    Right val -> (print val)
+    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
+
 rep :: String -> String
 rep input = case parse parseExpr "lisp" input of
     Left err -> "No match: " ++ show err
@@ -98,7 +105,12 @@ compileCode code = do
     Right val -> (print (showC val))
     Left err -> (hPutStrLn stderr ("Error: " ++ show err))
 
+if' :: Bool -> a -> a -> a
+if' True  x _ = x
+if' False _ y = y
+
 main :: IO ()
 main = do
   code <- getContents
-  compileCode code
+  args <- getArgs
+  if' ("--parse" `elem` args) (parseCode code) (compileCode code)
