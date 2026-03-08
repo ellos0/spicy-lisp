@@ -1,22 +1,21 @@
 cabal-version: 3.0
 name: bubblescript
 version: 0.1.0.0
--- synopsis:
--- description:
-license-file:       LICENSE
-author:             ellos0
--- copyright:
-build-type:         Simple
--- extra-source-files:
-
-common warnings
-    ghc-options: -Wall
+license-file: LICENSE
+author: ellos0
 
 executable bubble
-    import:           warnings
     main-is:          Main.hs
-    other-modules: Codegen, Struct
-    -- other-extensions:
-    build-depends:    parsec,base ^>=4.18.3.0
     hs-source-dirs:   src
+    
+    other-modules:
+      Codegen,
+      Struct
+    
+    build-depends:
+      base,
+      parsec
+
+    ghc-options: -Wall -Wcompat -Worphans
+    
     default-language: Haskell2010
