@@ -12,8 +12,8 @@ showVal :: LispVal -> String
 showVal (String contents) = "\"" ++ contents ++ "\""
 showVal (Atom name) = name
 showVal (Number contents) = show contents
-showVal (Bool True) = ":t"
-showVal (Bool False) = ":f"
+showVal (Bool True) = "true"
+showVal (Bool False) = "false"
 showVal (List contents) = "(" ++ unwordsList contents ++ ")"
 
 unwordsList :: [LispVal] -> String
