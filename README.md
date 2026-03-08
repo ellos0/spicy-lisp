@@ -4,4 +4,4 @@
 
 <h4>Style Guide</h4>
 
-<p>For the most part, everything is named in snake_case. This includes functions, objects, and structures. There isn't anything about file naming though, just end it in <code>.bubble</code>.</p 
+<p>For the most part, everything is named in snake_case. This includes functions, objects, and structures. Name your files in snake_case or flatcase. Not totally required but it would be nice to be consistent with less capitalization in my opinion. End all your files in <code>.bubble</code> please!</p 
