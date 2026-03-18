@@ -10,7 +10,8 @@ executable bubble
     
     other-modules:
       Codegen,
-      Struct
+      Struct,
+      Lexer
     
     build-depends:
       base,
