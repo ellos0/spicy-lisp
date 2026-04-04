@@ -2,9 +2,7 @@ module Lexer where
 
 import Text.ParserCombinators.Parsec hiding (spaces)
 import Control.Monad
-import System.IO
 import Struct
-import Codegen
 
 symbol :: Parser Char
 symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
@@ -75,30 +73,3 @@ parseExpr =  parseAtom
          <|> parseString
          <|> parseNumber
          <|> parseFullList
-
-
-parseCode :: String -> IO ()
-parseCode code = do
-  case parse parseExpr "lisp" code of
-    Right val -> (print val)
-    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
-
-rep :: String -> String
-rep input = case parse parseExpr "lisp" input of
-    Left err -> "No match: " ++ show err
-    Right val -> showC val
-
-compileFile :: FilePath -> IO ()
-compileFile f = do
-  inputHandle <- openFile f ReadMode
-  contents <- hGetContents inputHandle
-  
-  case parse parseExpr "lisp" contents of
-    Right val -> (print (showC val))
-    Left err -> (print ("Error: " ++ show err))
-
-compileCode :: String -> IO ()
-compileCode code = do
-  case parse parseExpr "lisp" code of
-    Right val -> (print (showC val))
-    Left err -> (hPutStrLn stderr ("Error: " ++ show err))

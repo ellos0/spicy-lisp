@@ -1,6 +1,33 @@
-module Codegen (showC) where
+module Codegen (showC, parseCodePrint, compileCodePrint) where
 
 import Struct
+import Text.ParserCombinators.Parsec (parse)
+import Lexer
+import System.IO
+
+
+compileCode :: String -> String
+compileCode code = case parse parseExpr "lisp" code of
+                 Right val -> (showC val)
+                 Left _ -> ""
+
+parseCodePrint :: String -> IO ()
+parseCodePrint code = do
+  case parse parseExpr "lisp" code of
+    Right val -> (putStrLn (show val))
+    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
+
+compileCodePrint :: String -> IO ()
+compileCodePrint code = do
+  case parse parseExpr "lisp" code of
+    Right val -> (putStrLn (showC val))
+    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
+
+
+includeFile :: FilePath -> IO String
+includeFile file = do
+            contents <- readFile file
+            return $ compileCode contents
 
 makeOp :: String -> [LispVal] -> String
 makeOp op args = concat [showC (args !! 0), " ", op, " ", showC (args !! 1)]
@@ -27,7 +54,7 @@ showC (List (op:args)) = case (op) of
   (Atom "not") -> makeOp "!" args
   
   (Atom "print") -> concat ["printf(", showC (args !! 0), ");"]
-  (Atom "defun") -> concat [showC (args !! 1), " ", showC (args !! 0), "(){", showC (args !! 2), "}"]
+  (Atom "defun") -> concat [showC (args !! 1), " ", showC (args !! 0), "(){\n", showC (args !! 2), "\n}\n"]
   (Atom "type") -> (case (args !! 0) of
                       (Atom "i4") -> "int"
                       (Atom "i2") -> "short"
@@ -35,6 +62,8 @@ showC (List (op:args)) = case (op) of
                       )
 
   (Atom "if") -> concat ["if (", showC (args !! 0), ") {", showC (args !! 1), "}"]
+
+  -- (Atom "include") -> includeFile (showC $ args !! 0)
   
   (List _) -> concat (map showC (op:args))
   _ -> ""
