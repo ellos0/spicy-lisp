@@ -1,33 +1,6 @@
-module Codegen (showC, parseCodePrint, compileCodePrint) where
+module Codegen (showC) where
 
 import Struct
-import Text.ParserCombinators.Parsec (parse)
-import Lexer
-import System.IO
-
-
-compileCode :: String -> String
-compileCode code = case parse parseExpr "lisp" code of
-                 Right val -> (showC val)
-                 Left _ -> ""
-
-parseCodePrint :: String -> IO ()
-parseCodePrint code = do
-  case parse parseExpr "lisp" code of
-    Right val -> (putStrLn (show val))
-    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
-
-compileCodePrint :: String -> IO ()
-compileCodePrint code = do
-  case parse parseExpr "lisp" code of
-    Right val -> (putStrLn (showC val))
-    Left err -> (hPutStrLn stderr ("Error: " ++ show err))
-
-
-includeFile :: FilePath -> IO String
-includeFile file = do
-            contents <- readFile file
-            return $ compileCode contents
 
 makeOp :: String -> [LispVal] -> String
 makeOp op args = concat [showC (args !! 0), " ", op, " ", showC (args !! 1)]

@@ -2,7 +2,7 @@ module Main where
 
 import System.Environment (getArgs)
 
-import Codegen (parseCodePrint, compileCodePrint)
+import Compilation
 
 main :: IO ()
 main = do
